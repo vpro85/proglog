@@ -15,6 +15,7 @@ jobs:
       - run: mkdir "$HOME/.ssh"
       - run: echo "${{ secrets.key }}" > "$HOME/.ssh/key"
       - run: echo "TEST" > "$HOME/test.txt"
+      - run: cat ./test.txt
       - run: chmod 600 "$HOME/.ssh/key"
       # Deploy
-      - run: cd app && rsync -e "ssh -p 20022 -i $HOME/.ssh/key -o StrictHostKeyChecking=no" --archive --compress --delete ./test.txt root@143.198.135.242:/home/seismos/app
+      - run: rsync -e "ssh -p 20022 -i $HOME/.ssh/key -o StrictHostKeyChecking=no" --archive --compress --delete ./test.txt root@143.198.135.242:/home/seismos/app
