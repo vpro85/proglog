@@ -17,4 +17,4 @@ jobs:
       - run: echo "TEST" > "$HOME/test.txt"  
       - run: chmod 600 "$HOME/.ssh/key"
       # Deploy
-      - run: rsync -e "ssh -p 20022 -i $HOME/.ssh/key -o StrictHostKeyChecking=no" --archive --compress --delete ./test.txt root@143.198.135.242:/home/seismos/app
+      - run: rsync -e "ssh -p 22 -i $HOME/.ssh/key -o StrictHostKeyChecking=no" --archive --compress --delete ./test.txt root@143.198.135.242:/home/seismos/app
