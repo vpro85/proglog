@@ -2,6 +2,7 @@ package log
 
 import (
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"path"
@@ -151,4 +152,13 @@ func (l *Log) Truncate(lowest uint64) error {
 	}
 	l.segments = segments
 	return nil
+}
+func (l *Log) Reader() io.Reader {
+	l.mu.RLock()
+	defer l.mu.RUnlock()
+	readers := make([]io.Reader, len(l.segments))
+	for i, segment := range l.segments {
+		readers[i] = &originReader{segment.store, 0}
+	}
+	return io.MultiReader(readers...)
 }
