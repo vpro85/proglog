@@ -15,7 +15,7 @@ func TestLog(t *testing.T) {
 		"offset out of range error":         testOutOfRangeErr,
 		"init with existing segments":       testInitExisting,
 		"reader":                            testReader,
-		//"truncate":                          testTruncate,
+		"truncate":                          testTruncate,
 	} {
 		t.Run(scenario, func(t *testing.T) {
 			dir, err := ioutil.TempDir("", "store-test")
@@ -93,4 +93,19 @@ func testReader(t *testing.T, log *Log) {
 	err = proto.Unmarshal(b[lenWidth:], read)
 	require.NoError(t, err)
 	require.Equal(t, append.Value, read.Value)
+}
+
+func testTruncate(t *testing.T, log *Log) {
+	append := &api.Record{
+		Value: []byte("hello world"),
+	}
+	for i := 0; i < 3; i++ {
+		_, err := log.Append(append)
+		require.NoError(t, err)
+	}
+	err := log.Truncate(1)
+	require.NoError(t, err)
+
+	_, err = log.Read(0)
+	require.Error(t, err)
 }
