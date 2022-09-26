@@ -59,7 +59,7 @@ func setupTest(t *testing.T, fn func(config *Config)) (
 	go func() {
 		server.Serve(l)
 	}()
-	client = api.NewLogClient(сс)
+	client = api.NewLogClient(cc)
 
 	return client, cfg, func() {
 		server.Stop()
