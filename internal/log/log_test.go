@@ -2,6 +2,7 @@ package log
 
 import (
 	"github.com/stretchr/testify/require"
+	"google.golang.org/protobuf/proto"
 	"io/ioutil"
 	"os"
 	api "proglog/api/v1"
@@ -13,7 +14,7 @@ func TestLog(t *testing.T) {
 		"append and read a record succeeds": testAppendRead,
 		"offset out of range error":         testOutOfRangeErr,
 		"init with existing segments":       testInitExisting,
-		//"reader":                            testReader,
+		"reader":                            testReader,
 		//"truncate":                          testTruncate,
 	} {
 		t.Run(scenario, func(t *testing.T) {
@@ -74,4 +75,22 @@ func testInitExisting(t *testing.T, o *Log) {
 	off, err = n.HighestOffset()
 	require.NoError(t, err)
 	require.Equal(t, uint64(2), off)
+}
+
+func testReader(t *testing.T, log *Log) {
+	append := &api.Record{
+		Value: []byte("hello world"),
+	}
+	off, err := log.Append(append)
+	require.NoError(t, err)
+	require.Equal(t, uint64(0), off)
+
+	reader := log.Reader()
+	b, err := ioutil.ReadAll(reader)
+	require.NoError(t, err)
+
+	read := &api.Record{}
+	err = proto.Unmarshal(b[lenWidth:], read)
+	require.NoError(t, err)
+	require.Equal(t, append.Value, read.Value)
 }
