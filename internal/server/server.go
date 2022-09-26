@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	api "proglog/api/v1"
 )
 
@@ -20,4 +21,12 @@ func newgrpcServer(config *Config) (srv *grpcServer, err error) {
 		Config: config,
 	}
 	return srv, nil
+}
+
+func (s *grpcServer) Produce(ctx context.Context, req *api.ProduceRequest) (*api.ProduceResponse, error) {
+	offset, err := s.CommitLog.Append(req.Record)
+	if err != nil {
+		return nil, err
+	}
+	return &api.ProduceResponse{Offset: offset}, nil
 }
