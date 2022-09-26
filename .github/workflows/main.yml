@@ -1,20 +1,20 @@
-name: Deploy
-
-on:
-  push:
-    branches:
-      - master
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      # Setup key
-      - run: set -eu
-      - run: mkdir "$HOME/.ssh"
-      - run: echo "${{ secrets.key }}" > "$HOME/.ssh/key"
-      - run: echo "TEST" > "$HOME/test.txt"  
-      - run: chmod 600 "$HOME/.ssh/key"
-      # Deploy
-      - run: rsync -e "ssh -p 22 -i $HOME/.ssh/key -o StrictHostKeyChecking=no" --archive --compress --delete $HOME/test.txt root@143.198.135.242:/home/seismos/app
+#name: Deploy
+#
+#on:
+#  push:
+#    branches:
+#      - master
+#
+#jobs:
+#  deploy:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v2
+#      # Setup key
+#      - run: set -eu
+#      - run: mkdir "$HOME/.ssh"
+#      - run: echo "${{ secrets.key }}" > "$HOME/.ssh/key"
+#      - run: echo "TEST" > "$HOME/test.txt"
+#      - run: chmod 600 "$HOME/.ssh/key"
+#      # Deploy
+#      - run: rsync -e "ssh -p 22 -i $HOME/.ssh/key -o StrictHostKeyChecking=no" --archive --compress --delete $HOME/test.txt root@143.198.135.242:/home/seismos/app
