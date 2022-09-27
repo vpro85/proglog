@@ -3,7 +3,7 @@ module proglog
 go 1.13
 
 require (
-	github.com/casbin/casbin v1.9.1 // indirect
+	github.com/casbin/casbin v1.9.1
 	github.com/gorilla/mux v1.8.0
 	github.com/kr/text v0.2.0 // indirect
 	github.com/stretchr/testify v1.8.0
