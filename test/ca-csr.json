@@ -4,13 +4,11 @@
     "algo": "rsa",
     "size": 2048
   },
-  "names": [
-    {
-      "C": "RU",
-      "L": "KLD",
-      "ST": "Kaliningrad",
-      "O": "Vaeringer Cpmpany",
-      "OU": "CA Services"
-    }
-  ]
+  "names": [{
+    "C": "RU",
+    "L": "KLD",
+    "ST": "Kaliningrad",
+    "O": "Vaeringer Cpmpany",
+    "OU": "CA Services"
+  }]
 }

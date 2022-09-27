@@ -1,17 +1,18 @@
 {
   "CN": "client",
-  "hosts": [""],
+  "hosts": [
+    "localhost",
+    "127.0.0.1"
+  ],
   "key": {
     "algo": "rsa",
     "size": 2048
   },
-  "names": [
-    {
-      "C": "RU",
-      "L": "KLD",
-      "ST": "Kaliningrad",
-      "O": "Vaeringer Cpmpany",
-      "OU": "Distributed Services"
-    }
-  ]
+  "names": [{
+    "C": "RU",
+    "L": "KLD",
+    "ST": "Kaliningrad",
+    "O": "Vaeringer Cpmpany",
+    "OU": "Distributed Services"
+  }]
 }
