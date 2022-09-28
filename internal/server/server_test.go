@@ -2,19 +2,36 @@ package server
 
 import (
 	"context"
+	"flag"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/status"
 	"io/ioutil"
 	"net"
+	"os"
 	api "proglog/api/v1"
 	"proglog/internal/auth"
 	"proglog/internal/config"
 	"proglog/internal/log"
 	"testing"
 )
+
+var debug = flag.Bool("debug", false, "Enable observability for debugging.")
+
+func TestMain(m *testing.M) {
+	flag.Parse()
+	if *debug {
+		logger, err := zap.NewDevelopment()
+		if err != nil {
+			panic(err)
+		}
+		zap.ReplaceGlobals(logger)
+	}
+	os.Exit(m.Run())
+}
 
 func TestServer(t *testing.T) {
 	for scenario, fn := range map[string]func(
@@ -80,26 +97,6 @@ func setupTest(t *testing.T, fn func(config *Config)) (
 		config.NobodyClientCertFile,
 		config.NobodyClientKeyFile,
 	)
-
-	//clientTLSConfig, err := config.SetupTLSConfig(config.TLSConfig{
-	//	CertFile: config.ClientCertFile,
-	//	KeyFile:  config.ClientKeyFile,
-	//	CAFile:   config.CAFile,
-	//})
-	//require.NoError(t, err)
-	//
-	//clientCreds := credentials.NewTLS(clientTLSConfig)
-	//cc, err := grpc.Dial(
-	//	l.Addr().String(),
-	//	grpc.WithTransportCredentials(clientCreds),
-	//)
-	//require.NoError(t, err)
-	//
-	//client = api.NewLogClient(cc)
-
-	//clientOptions := []grpc.DialOption{grpc.WithInsecure()}
-	//cc, err := grpc.Dial(l.Addr().String(), clientOptions...)
-	//require.NoError(t, err)
 
 	serverTLSConfig, err := config.SetupTLSConfig(config.TLSConfig{
 		CertFile:      config.ServerCertFile,
