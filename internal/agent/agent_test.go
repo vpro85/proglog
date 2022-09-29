@@ -1,11 +1,13 @@
 package agent_test
 
 import (
+	"context"
 	"fmt"
 	"github.com/stretchr/testify/require"
 	"github.com/travisjeffery/go-dynaport"
 	"io/ioutil"
 	"os"
+	api "proglog/api/v1"
 	"proglog/internal/agent"
 	"proglog/internal/config"
 	"testing"
@@ -65,4 +67,35 @@ func TestAgent(t *testing.T) {
 		}
 	}()
 	time.Sleep(3 * time.Second)
+
+	leaderClient := client(t, agents[0], peerTLSConfig)
+	produceResponse, err := leaderClient.Produce(
+		context.Background(),
+		&api.ProduceRequest{
+			Record: &api.Record{
+				Value: []byte("foo"),
+			},
+		},
+	)
+	require.NoError(t, err)
+	consumeResponse, err := leaderClient.Consume(
+		context.Background(),
+		&api.ConsumeRequest{
+			Offset: produceResponse.Offset,
+		},
+	)
+	require.NoError(t, err)
+	require.Equal(t, consumeResponse.Record.Value, []byte("foo"))
+	// wait until replication has finished
+	time.Sleep(3 * time.Second)
+
+	followerClient := client(t, agents[1], peerTLSConfig)
+	consumeResponse, err = followerClient.Consume(
+		context.Background(),
+		&api.ConsumeRequest{
+			Offset: produceResponse.Offset,
+		},
+	)
+	require.NoError(t, err)
+	require.Equal(t, consumeResponse.Record.Value, []byte("foo"))
 }
