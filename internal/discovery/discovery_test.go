@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/serf/serf"
 	"github.com/stretchr/testify/require"
+	"github.com/travisjeffery/go-dynaport"
 	"testing"
 	"time"
 )
