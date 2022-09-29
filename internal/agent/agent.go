@@ -36,7 +36,7 @@ type Config struct {
 	RPCPort         int
 	NodeName        string
 	StartJoinAddrs  []string
-	ACLModeFile     string
+	ACLModelFile    string
 	ACLPolicyFile   string
 }
 
@@ -87,7 +87,7 @@ func (a *Agent) setupLog() error {
 
 func (a *Agent) setupServer() error {
 	authorizer := auth.New(
-		a.Config.ACLModeFile,
+		a.Config.ACLModelFile,
 		a.Config.ACLPolicyFile,
 	)
 	serverConfig := &server.Config{
@@ -142,7 +142,7 @@ func (a *Agent) setupMembership() error {
 		NodeName: a.Config.NodeName,
 		BindAddr: a.Config.BindAddr,
 		Tags: map[string]string{
-			"rpc+addr": rpcAddr,
+			"rpc_addr": rpcAddr,
 		},
 		StartJoinAddrs: a.Config.StartJoinAddrs,
 	})

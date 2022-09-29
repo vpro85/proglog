@@ -56,7 +56,7 @@ func TestAgent(t *testing.T) {
 			RPCPort:         rpcPort,
 			NodeName:        fmt.Sprintf("%d", i),
 			StartJoinAddrs:  startJoinAddrs,
-			ACLModeFile:     config.ACLModelFile,
+			ACLModelFile:    config.ACLModelFile,
 			ACLPolicyFile:   config.ACLPolicyFile,
 		})
 		require.NoError(t, err)
