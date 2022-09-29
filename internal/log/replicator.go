@@ -119,3 +119,11 @@ func (r *Replicator) Close() error {
 	close(r.close)
 	return nil
 }
+
+func (r *Replicator) logError(err error, msg, addr string) {
+	r.logger.Error(
+		msg,
+		zap.String("addr", addr),
+		zap.Error(err),
+	)
+}
