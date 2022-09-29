@@ -1,6 +1,7 @@
 package log
 
 import (
+	"context"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	api "proglog/api/v1"
@@ -33,4 +34,35 @@ func (r *Replicator) Join(name, addr string) error {
 
 	go r.replicate(addr, r.servers[name])
 	return nil
+}
+
+func (r *Replicator) replicate(addr string, leave chan struct{}) {
+	cc, err := grpc.Dial(addr, r.DialOptions...)
+	if err != nil {
+		r.logError(err, "failed to dial", addr)
+		return
+	}
+	defer cc.Close()
+
+	client := api.NewLogClient(cc)
+
+	ctx := context.Background()
+	stream, err := client.ConsumeStream(ctx, &api.ConsumeRequest{
+		Offset: 0,
+	})
+	if err != nil {
+		r.logError(err, "failed to consume", addr)
+		return
+	}
+	records := make(chan *api.Record)
+	go func() {
+		for {
+			recv, err := stream.Recv()
+			if err != nil {
+				r.logError(err, "failed to receive", addr)
+				return
+			}
+			records <- recv.Record
+		}
+	}()
 }
