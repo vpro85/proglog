@@ -65,4 +65,20 @@ func (r *Replicator) replicate(addr string, leave chan struct{}) {
 			records <- recv.Record
 		}
 	}()
+	for {
+		select {
+		case <-r.close:
+			return
+		case <-leave:
+			return
+		case record := <-records:
+			_, err = r.LocalServer.Produce(ctx, &api.ProduceRequest{
+				Record: record,
+			})
+			if err != nil {
+				r.logError(err, "failed to produce", addr)
+				return
+			}
+		}
+	}
 }
