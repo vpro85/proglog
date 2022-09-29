@@ -96,9 +96,30 @@ func (m *Membership) handleJoin(member serf.Member) {
 }
 
 func (m *Membership) handleLeave(member serf.Member) {
-	if err:=m.handler.Leave(
-		member.Name
-		); err!= nil {
+	if err := m.handler.Leave(
+		member.Name,
+	); err != nil {
 		m.logError(err, "failed to leave", member)
 	}
+}
+
+func (m *Membership) isLocal(member serf.Member) bool {
+	return m.serf.LocalMember().Name == member.Name
+}
+
+func (m *Membership) Members() []serf.Member {
+	return m.serf.Members()
+}
+
+func (m *Membership) Leave() error {
+	return m.serf.Leave()
+}
+
+func (m *Membership) logError(err error, msg string, member serf.Member) {
+	m.logger.Error(
+		msg,
+		zap.Error(err),
+		zap.String("name", member.Name),
+		zap.String("rpc_addr", member.Tags["rpc_addr"]),
+	)
 }
