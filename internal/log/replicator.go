@@ -106,3 +106,16 @@ func (r *Replicator) init() {
 		r.close = make(chan struct{})
 	}
 }
+
+func (r *Replicator) Close() error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.init()
+
+	if r.closed {
+		return nil
+	}
+	r.closed = true
+	close(r.close)
+	return nil
+}
