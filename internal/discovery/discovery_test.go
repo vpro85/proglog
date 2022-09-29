@@ -56,3 +56,25 @@ func setupMember(t *testing.T, members []*Membership) ([]*Membership, *handler) 
 	members = append(members, m)
 	return members, h
 }
+
+type handler struct {
+	joins  chan map[string]string
+	leaves chan string
+}
+
+func (h *handler) Join(id, addr string) error {
+	if h.joins != nil {
+		h.joins <- map[string]string{
+			"id":   id,
+			"addr": addr,
+		}
+	}
+	return nil
+}
+
+func (h *handler) Leave(id string) error {
+	if h.leaves != nil {
+		h.leaves <- id
+	}
+	return nil
+}
