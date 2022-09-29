@@ -94,3 +94,15 @@ func (r *Replicator) Leave(name string) error {
 	delete(r.servers, name)
 	return nil
 }
+
+func (r *Replicator) init() {
+	if r.logger == nil {
+		r.logger = zap.L().Named("replicator")
+	}
+	if r.servers == nil {
+		r.servers = make(map[string]chan struct{})
+	}
+	if r.close == nil {
+		r.close = make(chan struct{})
+	}
+}
