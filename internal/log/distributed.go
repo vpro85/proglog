@@ -173,9 +173,27 @@ const (
 	AppendRequestType RequestType = 0
 )
 
-func (f fsm) Apply(log *raft.Log) interface{} {
-	//TODO implement me
-	panic("implement me")
+func (l *fsm) Apply(record *raft.Log) interface{} {
+	buf := record.Data
+	reqType := RequestType(buf[0])
+	switch reqType {
+	case AppendRequestType:
+		return l.applyAppend(buf[1:])
+	}
+	return nil
+}
+
+func (l *fsm) applyAppend(b []byte) interface{} {
+	var req api.ProduceRequest
+	err := proto.Unmarshal(b, &req)
+	if err != nil {
+		return err
+	}
+	offset, err := l.log.Append(req.Record)
+	if err != nil {
+		return err
+	}
+	return &api.ProduceResponse{Offset: offset}
 }
 
 func (f fsm) Snapshot() (raft.FSMSnapshot, error) {
