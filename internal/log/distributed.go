@@ -1,8 +1,10 @@
 package log
 
 import (
+	"bytes"
 	"github.com/hashicorp/raft"
 	raftboltdb "github.com/hashicorp/raft-boltdb"
+	"google.golang.org/protobuf/proto"
 	"os"
 	"path/filepath"
 	api "proglog/api/v1"
@@ -126,4 +128,30 @@ func (l *DistributedLog) Append(record *api.Record) (uint64, error) {
 		return 0, err
 	}
 	return res.(*api.ProduceResponse).Offset, nil
+}
+
+func (l *DistributedLog) apply(reqType RequestType, req proto.Message) (interface{}, error) {
+	var buf bytes.Buffer
+	_, err := buf.Write([]byte{byte(reqType)})
+	if err != nil {
+		return nil, err
+	}
+	b, err := proto.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+	_, err = buf.Write(b)
+	if err != nil {
+		return nil, err
+	}
+	timeout := 10 * time.Second
+	future := l.raft.Apply(buf.Bytes(), timeout)
+	if future.Error() != nil {
+		return nil, future.Error()
+	}
+	res := future.Response()
+	if err, ok := res.(error); ok {
+		return nil, err
+	}
+	return res, nil
 }
