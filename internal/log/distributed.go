@@ -2,8 +2,10 @@ package log
 
 import (
 	"github.com/hashicorp/raft"
+	raftboltdb "github.com/hashicorp/raft-boltdb"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 type DistributedLog struct {
@@ -47,4 +49,25 @@ func (l *DistributedLog) setupRaft(dataDir string) error {
 	if err != nil {
 		return err
 	}
+	stableStore, err := raftboltdb.NewBoltStore(filepath.Join(dataDir, "raft", "stable"))
+	if err != nil {
+		return err
+	}
+	retain := 1
+	snapshotStore, err := raft.NewFileSnapshotStore(
+		filepath.Join(dataDir, "raft"),
+		retain,
+		os.Stderr,
+	)
+	if err != nil {
+		return err
+	}
+	maxPool := 5
+	timeout := 10 * time.Second
+	transport := raft.NewNetworkTransport(
+		l.config.Raft.StreamLayer,
+		maxPool,
+		timeout,
+		os.Stderr,
+	)
 }
