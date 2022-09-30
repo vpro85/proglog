@@ -70,4 +70,20 @@ func (l *DistributedLog) setupRaft(dataDir string) error {
 		timeout,
 		os.Stderr,
 	)
+
+	config := raft.DefaultConfig()
+	config.LocalID = l.config.Raft.LocalID
+	if l.config.Raft.HeartbeatTimeout != 0 {
+		config.HeartbeatTimeout = l.config.Raft.HeartbeatTimeout
+	}
+	if l.config.Raft.ElectionTimeout != 0 {
+		config.ElectionTimeout = l.config.Raft.ElectionTimeout
+	}
+	if l.config.Raft.LeaderLeaseTimeout != 0 {
+		config.LeaderLeaseTimeout = l.config.Raft.LeaderLeaseTimeout
+	}
+	if l.config.Raft.CommitTimeout != 0 {
+		config.CommitTimeout = l.config.Raft.CommitTimeout
+	}
+
 }
