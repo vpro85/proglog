@@ -34,3 +34,17 @@ func (l *DistributedLog) setupLog(dataDir string) error {
 	l.log, err = NewLog(logDir, l.config)
 	return err
 }
+
+func (l *DistributedLog) setupRaft(dataDir string) error {
+	fsm := &fsm{log: l.log}
+	logDir := filepath.Join(dataDir, "raft", "log")
+	if err := os.MkdirAll(logDir, 0755); err != nil {
+		return err
+	}
+	logConfig := l.config
+	logConfig.Segment.InitialOffset = 1
+	logStore, err := newLogStore(logDir, logConfig)
+	if err != nil {
+		return err
+	}
+}
