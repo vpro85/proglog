@@ -5,6 +5,7 @@ import (
 	"github.com/hashicorp/raft"
 	raftboltdb "github.com/hashicorp/raft-boltdb"
 	"google.golang.org/protobuf/proto"
+	"io"
 	"os"
 	"path/filepath"
 	api "proglog/api/v1"
@@ -158,4 +159,31 @@ func (l *DistributedLog) apply(reqType RequestType, req proto.Message) (interfac
 
 func (l *DistributedLog) Read(offset uint64) (*api.Record, error) {
 	return l.log.Read(offset)
+}
+
+var _ raft.FSM = (*fsm)(nil)
+
+type fsm struct {
+	log *Log
+}
+
+type RequestType uint8
+
+const (
+	AppendRequestType RequestType = 0
+)
+
+func (f fsm) Apply(log *raft.Log) interface{} {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (f fsm) Snapshot() (raft.FSMSnapshot, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (f fsm) Restore(closer io.ReadCloser) error {
+	//TODO implement me
+	panic("implement me")
 }
