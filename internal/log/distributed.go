@@ -327,6 +327,8 @@ func NewStreamLayer(
 	}
 }
 
+const RaftRPC = 1
+
 func (s *StreamLayer) Accept() (net.Conn, error) {
 	//TODO implement me
 	panic("implement me")
@@ -343,6 +345,18 @@ func (s *StreamLayer) Addr() net.Addr {
 }
 
 func (s *StreamLayer) Dial(addr raft.ServerAddress, timeout time.Duration) (net.Conn, error) {
-	//TODO implement me
-	panic("implement me")
+	dialer := &net.Dialer{Timeout: timeout}
+	var conn, err = dialer.Dial("tcp", string(addr))
+	if err != nil {
+		return nil, err
+	}
+	// identify to mux this is a raft rpc
+	_, err = conn.Write([]byte{byte(RaftRPC)})
+	if err != nil {
+		return nil, err
+	}
+	if s.peerTLSConfig != nil {
+		conn = tls.Client(conn, s.peerTLSConfig)
+	}
+	return conn, err
 }
