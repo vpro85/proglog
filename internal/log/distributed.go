@@ -3,6 +3,7 @@ package log
 import (
 	"bytes"
 	"crypto/tls"
+	"fmt"
 	"github.com/hashicorp/raft"
 	raftboltdb "github.com/hashicorp/raft-boltdb"
 	"google.golang.org/protobuf/proto"
@@ -330,18 +331,30 @@ func NewStreamLayer(
 const RaftRPC = 1
 
 func (s *StreamLayer) Accept() (net.Conn, error) {
-	//TODO implement me
-	panic("implement me")
+	conn, err := s.ln.Accept()
+	if err != nil {
+		return nil, err
+	}
+	b := make([]byte, 1)
+	_, err = conn.Read(b)
+	if err != nil {
+		return nil, err
+	}
+	if bytes.Compare([]byte{byte(RaftRPC)}, b) != 0 {
+		return nil, fmt.Errorf("not a raft rpc")
+	}
+	if s.serverTLSConfig != nil {
+		return tls.Server(conn, s.serverTLSConfig), nil
+	}
+	return conn, nil
 }
 
 func (s *StreamLayer) Close() error {
-	//TODO implement me
-	panic("implement me")
+	return s.ln.Close()
 }
 
 func (s *StreamLayer) Addr() net.Addr {
-	//TODO implement me
-	panic("implement me")
+	return s.ln.Addr()
 }
 
 func (s *StreamLayer) Dial(addr raft.ServerAddress, timeout time.Duration) (net.Conn, error) {
