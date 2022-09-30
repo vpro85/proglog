@@ -196,10 +196,26 @@ func (l *fsm) applyAppend(b []byte) interface{} {
 	return &api.ProduceResponse{Offset: offset}
 }
 
-func (f fsm) Snapshot() (raft.FSMSnapshot, error) {
-	//TODO implement me
-	panic("implement me")
+func (f *fsm) Snapshot() (raft.FSMSnapshot, error) {
+	r := f.log.Reader()
+	return &snapshot{reader: r}, nil
 }
+
+var _ raft.FSMSnapshot = (*snapshot)(nil)
+
+type snapshot struct {
+	reader io.Reader
+}
+
+func (s *snapshot) Persist(sink raft.SnapshotSink) error {
+	if _, err := io.Copy(sink, s.reader); err != nil {
+		_ = sink.Cancel()
+		return err
+	}
+	return sink.Close()
+}
+
+func (s *snapshot) Release() {}
 
 func (f fsm) Restore(closer io.ReadCloser) error {
 	//TODO implement me
