@@ -294,8 +294,7 @@ func (l *logStore) StoreLogs(records []*raft.Log) error {
 }
 
 func (l *logStore) DeleteRange(min, max uint64) error {
-	//TODO implement me
-	panic("implement me")
+	return l.Truncate(max)
 }
 
 func newLogStore(dir string, c Config) (*logStore, error) {
