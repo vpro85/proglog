@@ -155,3 +155,7 @@ func (l *DistributedLog) apply(reqType RequestType, req proto.Message) (interfac
 	}
 	return res, nil
 }
+
+func (l *DistributedLog) Read(offset uint64) (*api.Record, error) {
+	return l.log.Read(offset)
+}
