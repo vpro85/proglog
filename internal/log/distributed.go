@@ -85,5 +85,33 @@ func (l *DistributedLog) setupRaft(dataDir string) error {
 	if l.config.Raft.CommitTimeout != 0 {
 		config.CommitTimeout = l.config.Raft.CommitTimeout
 	}
-
+	l.raft, err = raft.NewRaft(
+		config,
+		fsm,
+		logStore,
+		stableStore,
+		snapshotStore,
+		transport,
+	)
+	if err != nil {
+		return err
+	}
+	hasState, err := raft.HasExistingState(
+		logStore,
+		stableStore,
+		snapshotStore,
+	)
+	if err != nil {
+		return err
+	}
+	if l.config.Raft.Bootstrap && !hasState {
+		config := raft.Configuration{
+			Servers: []raft.Server{{
+				ID:      config.LocalID,
+				Address: transport.LocalAddr(),
+			}},
+		}
+		err = l.raft.BootstrapCluster(config).Error()
+	}
+	return err
 }
