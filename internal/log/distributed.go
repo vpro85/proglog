@@ -2,10 +2,12 @@ package log
 
 import (
 	"bytes"
+	"crypto/tls"
 	"github.com/hashicorp/raft"
 	raftboltdb "github.com/hashicorp/raft-boltdb"
 	"google.golang.org/protobuf/proto"
 	"io"
+	"net"
 	"os"
 	"path/filepath"
 	api "proglog/api/v1"
@@ -303,4 +305,44 @@ func newLogStore(dir string, c Config) (*logStore, error) {
 		return nil, err
 	}
 	return &logStore{log}, nil
+}
+
+var _ raft.StreamLayer = (*StreamLayer)(nil)
+
+type StreamLayer struct {
+	ln              net.Listener
+	serverTLSConfig *tls.Config
+	peerTLSConfig   *tls.Config
+}
+
+func NewStreamLayer(
+	ln net.Listener,
+	serverTLSConfig,
+	peerTLSConfig *tls.Config,
+) *StreamLayer {
+	return &StreamLayer{
+		ln:              ln,
+		serverTLSConfig: serverTLSConfig,
+		peerTLSConfig:   peerTLSConfig,
+	}
+}
+
+func (s *StreamLayer) Accept() (net.Conn, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (s *StreamLayer) Close() error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (s *StreamLayer) Addr() net.Addr {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (s *StreamLayer) Dial(addr raft.ServerAddress, timeout time.Duration) (net.Conn, error) {
+	//TODO implement me
+	panic("implement me")
 }
