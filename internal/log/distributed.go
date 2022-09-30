@@ -5,6 +5,7 @@ import (
 	raftboltdb "github.com/hashicorp/raft-boltdb"
 	"os"
 	"path/filepath"
+	api "proglog/api/v1"
 	"time"
 )
 
@@ -114,4 +115,15 @@ func (l *DistributedLog) setupRaft(dataDir string) error {
 		err = l.raft.BootstrapCluster(config).Error()
 	}
 	return err
+}
+
+func (l *DistributedLog) Append(record *api.Record) (uint64, error) {
+	res, err := l.apply(
+		AppendRequestType,
+		&api.ProduceRequest{Record: record},
+	)
+	if err != nil {
+		return 0, err
+	}
+	return res.(*api.ProduceResponse).Offset, nil
 }
