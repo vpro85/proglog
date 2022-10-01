@@ -71,4 +71,20 @@ func TestMultipleNodes(t *testing.T) {
 			return true
 		}, 500*time.Millisecond, 50*time.Millisecond)
 	}
+	err := logs[0].Leave("1")
+	require.NoError(t, err)
+	time.Sleep(50 * time.Millisecond)
+
+	off, err := logs[0].Append(&api.Record{Value: []byte("third")})
+	require.NoError(t, err)
+	time.Sleep(50 * time.Millisecond)
+
+	record, err := logs[1].Read(off)
+	require.IsType(t, api.ErrOffsetOutOfRange{}, err)
+	require.Nil(t, record)
+
+	record, err = logs[2].Read(off)
+	require.NoError(t, err)
+	require.Equal(t, []byte("third"), record.Value)
+	require.Equal(t, off, record.Offset)
 }
