@@ -33,5 +33,19 @@ func TestMultipleNodes(t *testing.T) {
 		config.Raft.ElectionTimeout = 50 * time.Millisecond
 		config.Raft.LeaderLeaseTimeout = 50 * time.Millisecond
 		config.Raft.CommitTimeout = 50 * time.Millisecond
+
+		if i == 0 {
+			config.Raft.Bootstrap = true
+		}
+		l, err := log.NewDistributedLog(dataDir, config)
+		require.NoError(t, err)
+		if i != 0 {
+			err = logs[0].Join(fmt.Sprintf("%d", i), ln.Addr().String())
+			require.NoError(t, err)
+		} else {
+			err = l.WaitForLeader(3 * time.Second)
+			require.NoError(t, err)
+		}
+		logs = append(logs, l)
 	}
 }
