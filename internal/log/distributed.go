@@ -212,6 +212,14 @@ func (l *DistributedLog) WaitForLeader(timeout time.Duration) error {
 	}
 }
 
+func (l *DistributedLog) Close() error {
+	f := l.raft.Shutdown()
+	if err := f.Error(); err != nil {
+		return err
+	}
+	return l.log.Close()
+}
+
 var _ raft.FSM = (*fsm)(nil)
 
 type fsm struct {
