@@ -8,7 +8,9 @@ import (
 	"io/ioutil"
 	"net"
 	"os"
+	api "proglog/api/v1"
 	"proglog/internal/log"
+	"reflect"
 	"testing"
 	"time"
 )
@@ -47,5 +49,26 @@ func TestMultipleNodes(t *testing.T) {
 			require.NoError(t, err)
 		}
 		logs = append(logs, l)
+	}
+	records := []*api.Record{
+		{Value: []byte("firsr")},
+		{Value: []byte("second")},
+	}
+	for _, record := range records {
+		off, err := logs[0].Append(record)
+		require.NoError(t, err)
+		require.Eventually(t, func() bool {
+			for j := 0; j < nodeCount; j++ {
+				got, err := logs[j].Read(off)
+				if err != nil {
+					return false
+				}
+				record.Offset = off
+				if !reflect.DeepEqual(got.Value, record.Value) {
+					return false
+				}
+			}
+			return true
+		}, 500*time.Millisecond, 50*time.Millisecond)
 	}
 }
