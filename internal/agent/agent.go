@@ -3,6 +3,7 @@ package agent
 import (
 	"crypto/tls"
 	"fmt"
+	"github.com/soheilhy/cmux"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -18,10 +19,10 @@ import (
 type Agent struct {
 	Config
 
-	log        *log.Log
+	mux        cmux.CMux
+	log        *log.DistributedLog
 	server     *grpc.Server
 	membership *discovery.Membership
-	replicator *log.Replicator
 
 	shutdown     bool
 	shutdowns    chan struct{}
