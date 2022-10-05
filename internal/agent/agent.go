@@ -57,6 +57,7 @@ func New(config Config) (*Agent, error) {
 	}
 	setup := []func() error{
 		a.setupLogger,
+		a.setupMux,
 		a.setupLog,
 		a.setupServer,
 		a.setupMembership,
@@ -174,5 +175,15 @@ func (a *Agent) Shutdown() error {
 			return err
 		}
 	}
+	return nil
+}
+
+func (a *Agent) setupMux() error {
+	rpcAddr := fmt.Sprintf(":%d", a.Config.RPCPort)
+	ln, err := net.Listen("tcp", rpcAddr)
+	if err != nil {
+		return err
+	}
+	a.mux = cmux.New(ln)
 	return nil
 }
