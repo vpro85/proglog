@@ -11,7 +11,6 @@ import (
 	"google.golang.org/grpc/credentials"
 	"io"
 	"net"
-	api "proglog/api/v1"
 	"proglog/internal/auth"
 	"proglog/internal/discovery"
 	"proglog/internal/log"
@@ -146,20 +145,7 @@ func (a *Agent) setupMembership() error {
 	if err != nil {
 		return err
 	}
-	var opts []grpc.DialOption
-	if a.Config.PeerTLSConfig != nil {
-		opts = append(opts, grpc.WithTransportCredentials(credentials.NewTLS(a.Config.PeerTLSConfig)))
-	}
-	conn, err := grpc.Dial(rpcAddr, opts...)
-	if err != nil {
-		return err
-	}
-	client := api.NewLogClient(conn)
-	a.replicator = &log.Replicator{
-		DialOptions: opts,
-		LocalServer: client,
-	}
-	a.membership, err = discovery.New(a.replicator, discovery.Config{
+	a.membership, err = discovery.New(a.log, discovery.Config{
 		NodeName: a.Config.NodeName,
 		BindAddr: a.Config.BindAddr,
 		Tags: map[string]string{
