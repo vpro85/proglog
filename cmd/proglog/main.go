@@ -6,7 +6,8 @@ import (
 )
 
 func main() {
-	cli := &cobra.Command{
+	cli := &cli{}
+	cmd := &cobra.Command{
 		Use:     "proglog",
 		PreRunE: cli.setupConfig,
 		RunE:    cli.run,
