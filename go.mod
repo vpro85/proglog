@@ -6,6 +6,7 @@ require (
 	github.com/casbin/casbin v1.9.1
 	github.com/gorilla/mux v1.8.0
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
+	github.com/hashicorp/go-hclog v1.3.1 // indirect
 	github.com/hashicorp/go.net v0.0.1 // indirect
 	github.com/hashicorp/memberlist v0.4.0 // indirect
 	github.com/hashicorp/raft v1.1.1 // indirect
