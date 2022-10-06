@@ -45,8 +45,9 @@ func (r *Resolver) ResolveNow(resolver.ResolveNowOptions) {
 }
 
 func (r *Resolver) Close() {
-	//TODO implement me
-	panic("implement me")
+	if err := r.resolverConn.Close(); err != nil {
+		r.logger.Error("failed to close conn", zap.Error(err))
+	}
 }
 
 var _ resolver.Builder = (*Resolver)(nil)
