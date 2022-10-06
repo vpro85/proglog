@@ -35,6 +35,16 @@ func TestPickerProducesToLeader(t *testing.T) {
 	}
 }
 
+func TestPickerConsumeFromFollowers(t *testing.T) {
+	picker, subConns := setupTest()
+	info := balancer.PickInfo{FullMethodName: "/log.vX.Log/Consume"}
+	for i := 0; i < 5; i++ {
+		pick, err := picker.Pick(info)
+		require.NoError(t, err)
+		require.Equal(t, subConns[i%2+1], pick.SubConn)
+	}
+}
+
 type subConn struct {
 	addrs []resolver.Address
 }
