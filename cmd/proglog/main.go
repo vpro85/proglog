@@ -5,9 +5,11 @@ import (
 	"github.com/spf13/viper"
 	"log"
 	"os"
+	"os/signal"
 	"path"
 	"proglog/internal/agent"
 	"proglog/internal/config"
+	"syscall"
 )
 
 func main() {
@@ -76,7 +78,15 @@ func (c *cli) setupConfig(cmd *cobra.Command, args []string) error {
 }
 
 func (c *cli) run(cmd *cobra.Command, args []string) error {
-	return nil
+	var err error
+	agent, err := agent.New(c.cfg.Config)
+	if err != nil {
+		return err
+	}
+	sigc := make(chan os.Signal, 1)
+	signal.Notify(sigc, syscall.SIGINT, syscall.SIGTERM)
+	<-sigc
+	return agent.Shutdown()
 }
 
 type cfg struct {
