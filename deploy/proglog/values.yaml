@@ -1,3 +1,4 @@
+# Default values for proglog.
 image:
   repository: proglog
   tag: 0.0.1
