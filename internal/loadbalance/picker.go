@@ -3,13 +3,15 @@ package loadbalance
 import (
 	"google.golang.org/grpc/balancer"
 	"google.golang.org/grpc/balancer/base"
+	"strings"
 	"sync"
+	"sync/atomic"
 )
 
 var _ base.PickerBuilder = (*Picker)(nil)
 
 type Picker struct {
-	mu        sync.Mutex
+	mu        sync.RWMutex
 	leader    balancer.SubConn
 	followers []balancer.SubConn
 	current   uint64
@@ -31,7 +33,25 @@ func (p *Picker) Build(buildInfo base.PickerBuildInfo) balancer.Picker {
 	return p
 }
 
+var _ balancer.Picker = (*Picker)(nil)
+
 func (p *Picker) Pick(info balancer.PickInfo) (balancer.PickResult, error) {
-	//TODO implement me
-	panic("implement me")
+	p.mu.RUnlock()
+	var result balancer.PickResult
+	if strings.Contains(info.FullMethodName, "Produce") || len(p.followers) == 0 {
+		result.SubConn = p.leader
+	} else if strings.Contains(info.FullMethodName, "Consume") {
+		result.SubConn = p.nextFollower()
+	}
+	if result.SubConn == nil {
+		return result, balancer.ErrNoSubConnAvailable
+	}
+	return result, nil
+}
+
+func (p *Picker) nextFollower() balancer.SubConn {
+	curr := atomic.AddUint64(&p.current, uint64(1))
+	len := uint64(len(p.followers))
+	idx := int(curr % len)
+	return p.followers[idx]
 }
