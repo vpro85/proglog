@@ -1,11 +1,14 @@
 package loadbalance
 
 import (
+	"context"
 	"fmt"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/attributes"
 	"google.golang.org/grpc/resolver"
 	"google.golang.org/grpc/serviceconfig"
+	api "proglog/api/v1"
 	"sync"
 )
 
@@ -18,8 +21,27 @@ type Resolver struct {
 }
 
 func (r *Resolver) ResolveNow(resolver.ResolveNowOptions) {
-	//TODO implement me
-	panic("implement me")
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	client := api.NewLogClient(r.resolverConn)
+	// get cluster and then set on cc attributes
+	ctx := context.Background()
+	res, err := client.GetServers(ctx, &api.GetServersRequest{})
+	if err != nil {
+		r.logger.Error("failed to resolve server", zap.Error(err))
+		return
+	}
+	var addrs []resolver.Address
+	for _, server := range res.Servers {
+		addrs = append(addrs, resolver.Address{
+			Addr:       server.RpcAddr,
+			Attributes: attributes.New("is_leader", server.IsLeader),
+		})
+	}
+	r.clientConn.UpdateState(resolver.State{
+		Addresses:     addrs,
+		ServiceConfig: r.serviceConfig,
+	})
 }
 
 func (r *Resolver) Close() {
@@ -55,3 +77,5 @@ func (r *Resolver) Scheme() string {
 func init() {
 	resolver.Register(&Resolver{})
 }
+
+var _ resolver.Resolver = (*Resolver)(nil)
