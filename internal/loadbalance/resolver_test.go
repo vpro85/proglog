@@ -17,7 +17,7 @@ import (
 
 type getServers struct{}
 
-func (g getServers) GetServers() ([]*api.Server, error) {
+func (g *getServers) GetServers() ([]*api.Server, error) {
 	return []*api.Server{{
 		Id:       "leader",
 		RpcAddr:  "localhost:9001",
@@ -33,8 +33,9 @@ type clientConn struct {
 	state resolver.State
 }
 
-func (c *clientConn) UpdateState(state resolver.State) {
+func (c *clientConn) UpdateState(state resolver.State) error {
 	c.state = state
+	return nil
 }
 
 func (c *clientConn) ReportError(err error)               {}
