@@ -11,6 +11,7 @@ require (
 	github.com/hashicorp/raft-boltdb v0.0.0-20171010151810-6e5ba93211ea // indirect
 	github.com/hashicorp/serf v0.8.5
 	github.com/soheilhy/cmux v0.1.5 // indirect
+	github.com/spf13/cobra v1.5.0 // indirect
 	github.com/stretchr/testify v1.7.0
 	github.com/travisjeffery/go-dynaport v1.0.0
 	github.com/tysonmote/gommap v0.0.2
