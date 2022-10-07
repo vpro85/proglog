@@ -23,6 +23,13 @@ spec:
       labels:
         {{- include "proglog.selectorLabels" . | nindent 8 }}
     spec:
+      initContainers:
+        - name: {{ include "proglog.fullname" . }}--config-init
+          image: busybox
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: datadir
+              mountPath: /var/run/proglog
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
@@ -31,16 +38,15 @@ spec:
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
-        - name: {{ .Chart.Name }}
-          securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
+        - name: {{ include "proglog.fullname" . }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
-            - name: rpc
-              containerPort: {{ .Values.rpcPort }}
-            - name: serf
-              containerPort: {{ .Values.serfPort }}
+          - name: rpc
+            containerPort: {{ .Values.rpcPort }}
+          - name: serf
+            containerPort: {{ .Values.serfPort }}
+#          args:
+#            - --config-file=/var/run/proglog/config.yaml
           livenessProbe:
             exec:
               command: [ "/bin/grpc_health_probe", "-addr=:{{ .Values.rpcPort }}" ]
@@ -63,11 +69,11 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-#  volumeClaimTemplates:
-#    - metadata:
-#        name: datadir
-#      spec:
-#        accessMode: [ "ReadWriteOnce" ]
-#        resources:
-#          requests:
-#            storage: {{ .Values.storage }}
+  volumeClaimTemplates:
+    - metadata:
+        name: datadir
+      spec:
+        accessMode: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: {{ .Values.storage }}
