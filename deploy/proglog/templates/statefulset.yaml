@@ -7,6 +7,7 @@ metadata:
     {{- include "proglog.labels" . | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
+  serviceName: {{ include "proglog.fullname" . }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
@@ -14,6 +15,7 @@ spec:
       {{- include "proglog.selectorLabels" . | nindent 6 }}
   template:
     metadata:
+      name: {{ include "proglog.fullname" . }}
       {{- with .Values.podAnnotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
@@ -61,3 +63,11 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+#  volumeClaimTemplates:
+#    - metadata:
+#        name: datadir
+#      spec:
+#        accessMode: [ "ReadWriteOnce" ]
+#        resources:
+#          requests:
+#            storage: {{ .Values.storage }}
