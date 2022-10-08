@@ -3,8 +3,7 @@ kind: Service
 metadata:
   name: {{ include "proglog.fullname" . }}
   namespace: {{ .Release.Namespace }}
-  labels:
-    {{- include "proglog.labels" . | nindent 4 }}
+  labels: {{ include "proglog.labels" . | nindent 4 }}
 spec:
   clusterIP: None
   publishNotReadyAddresses: true
@@ -20,5 +19,4 @@ spec:
       protocol: "UDP"
       port: {{ .Values.serfPort }}
       targetPort: {{ .Values.serfPort }}
-  selector:
-    {{- include "proglog.selectorLabels" . | nindent 4 }}
+  selector: {{ include "proglog.selectorLabels" . | nindent 4 }}
